@@ -1,9 +1,9 @@
 package com.hamaga.order.exceptions;
 
-import org.springframework.http.HttpStatus;
+import com.hamaga.order.exceptions.messages.ErrorCode;
 
 public class StockNoAvailableException extends DomainException {
-  public StockNoAvailableException(String message) {
-    super(message, HttpStatus.CONFLICT);
+  public StockNoAvailableException(ErrorCode message, Object... args) {
+    super(message, args);
   }
 }

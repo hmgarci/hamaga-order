@@ -26,7 +26,8 @@ public class GlobalErrorHandler implements ErrorWebExceptionHandler {
     }
     @Override
     public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
-        HttpStatus status = ex instanceof DomainException domainEx ? domainEx.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+        HttpStatus status = ex instanceof DomainException domainEx ? domainEx.getErrorCode().getHttpStatus() :
+                HttpStatus.INTERNAL_SERVER_ERROR;
         String error = ex instanceof DomainException ? "Business Error" : "Internal Server Error";
 
         log.error("Handled exception: {}", ex.getMessage(), ex);
@@ -37,6 +38,7 @@ public class GlobalErrorHandler implements ErrorWebExceptionHandler {
         Map<String, Object> errorAttributes = Map.of(
                 "error", error,
                 "message", ex.getMessage(),
+                "code", ex instanceof DomainException domainEx ? domainEx.getErrorCode().getCode() : "ERR-000",
                 "status", status.value(),
                 "path", exchange.getRequest().getPath().value()
         );

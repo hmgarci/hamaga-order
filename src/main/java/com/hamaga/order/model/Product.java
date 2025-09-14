@@ -12,13 +12,15 @@ import org.springframework.data.relational.core.mapping.Table;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table("orders")
-public class Order {
+@Table("product")
+public class Product {
     @Id
-    private Long orderId;
-    @Column("customer_id")
-    private String customerId;
     private Long productId;
-    private Integer quantity;
-    private String status;
+
+    private String name;
+
+    private String description;
+
+    @Column("available_quantity")
+    private Integer availableQuantity;
 }

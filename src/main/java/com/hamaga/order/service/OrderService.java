@@ -2,8 +2,10 @@ package com.hamaga.order.service;
 
 import com.hamaga.order.exceptions.SaveOrderException;
 import com.hamaga.order.exceptions.StockNoAvailableException;
+import com.hamaga.order.exceptions.messages.ErrorCode;
 import com.hamaga.order.model.Order;
 import com.hamaga.order.repository.OrderRepository;
+import com.hamaga.order.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -12,24 +14,26 @@ public class OrderService {
 
     private static final String PENDING_STATUS = "PENDING";
     private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
 
-    public OrderService(OrderRepository orderRepository) {
+    public OrderService(OrderRepository orderRepository, ProductRepository productRepository) {
         this.orderRepository = orderRepository;
+        this.productRepository = productRepository;
     }
 
     public Mono<Order> createOrder(Order order){
         order.setStatus(PENDING_STATUS);
-        return orderRepository.findById(order.getId())
-                .filter(orderExists -> orderExists.getQuantity() > order.getQuantity())
-                .flatMap(this::createOrderIfStockAvailable)
-                .switchIfEmpty(Mono.defer(() -> Mono.error(new StockNoAvailableException(
-                        "Stock not available for product: " + order.getProduct()))));
+            return productRepository.findById(order.getProductId())
+                .filter(productExists -> productExists.getAvailableQuantity() > order.getQuantity())
+                    .flatMap(product -> this.createOrderIfStockAvailable(order))
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new StockNoAvailableException(ErrorCode.STOCK_NOT_AVAILABLE,
+                        order.getProductId()))));
     }
 
     private Mono<Order> createOrderIfStockAvailable(Order order) {
         return orderRepository.save(order)
                 .onErrorResume(e -> Mono.error(new SaveOrderException(
-                        "Failed to create order due to insufficient stock for product: " + order.getProduct())));
+                        ErrorCode.ERROR_TO_SAVE_ORDER, e.getMessage())));
     }
 
 

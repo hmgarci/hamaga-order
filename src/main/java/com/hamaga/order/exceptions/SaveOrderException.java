@@ -1,9 +1,10 @@
 package com.hamaga.order.exceptions;
 
+import com.hamaga.order.exceptions.messages.ErrorCode;
 import org.springframework.http.HttpStatus;
 
 public class SaveOrderException extends DomainException {
-    public SaveOrderException(String message) {
-        super(message, HttpStatus.INTERNAL_SERVER_ERROR);
+    public SaveOrderException(ErrorCode message, Object... args) {
+        super(message, args);
     }
 }

@@ -1,6 +1,7 @@
 package com.hamaga.order.controller;
 
 import com.hamaga.order.exceptions.SaveOrderException;
+import com.hamaga.order.exceptions.messages.ErrorCode;
 import com.hamaga.order.model.Order;
 import com.hamaga.order.service.OrderService;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -22,11 +23,6 @@ public class OrderController {
     @PostMapping
     public Mono<Order> createOrder(ServerHttpRequest httpRequest,
                                    @RequestBody Order order){
-        return orderService.createOrder(order)
-                .onErrorResume(ex ->
-                        Mono.error(new SaveOrderException(
-                                "Failed to create order: ".concat(ex.getMessage())
-                        ))
-                );
+        return orderService.createOrder(order);
     }
 }
